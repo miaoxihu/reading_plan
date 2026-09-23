@@ -8,15 +8,19 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a37'/%3E%3Cpath d='M8 9h16v3H8zm0 6h16v3H8zm0 6h10v3H8z' fill='%23f5c77a'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="books.css" />
+  <link rel="stylesheet" href="mobile-nav.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" type="button" aria-controls="reading-navigation" aria-expanded="false" aria-label="打开书库与目录">☰ <span>书库</span></button>
       <div class="brand"><span class="brand-mark">M</span><div><strong>Musie读书工作台</strong><small>把读过的书，变成自己的判断力</small></div></div>
       <div class="top-actions"><span id="save-state">本地自动保存</span><button class="ghost" id="reset-btn">清空本地笔记</button></div>
     </header>
+    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" hidden></div>
     <main class="workspace">
-      <aside class="sidebar">
+      <aside class="sidebar" id="reading-navigation" aria-label="书库与阅读目录">
+        <div class="mobile-nav-head"><strong>书库与目录</strong><button id="mobile-nav-close" type="button" aria-label="关闭书库与目录">×</button></div>
         <div class="side-head"><span>我的书库</span><button class="add-book" id="add-book">＋ 添加书</button></div>
         <div class="book-index" id="book-index"><button class="book active" data-book="兵法"><span class="book-cover">策</span><span><b>孙子兵法与三十六计</b><small>13 篇 · 36 计</small></span></button><button class="book" data-book="new"><span class="book-cover muted-cover">＋</span><span><b>添加下一本书</b><small>建立新的阅读空间</small></span></button></div>
         <div class="side-head index-head"><span id="index-title">孙子兵法十三篇</span><span class="count" id="index-count">13 篇</span></div>

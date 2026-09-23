@@ -1,0 +1,22 @@
+.mobile-nav-toggle,.mobile-nav-head,.mobile-nav-backdrop{display:none}
+@media(max-width:680px){
+  .mobile-nav-toggle{display:inline-flex;align-items:center;gap:7px;flex:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 11px;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+  .topbar{gap:10px}
+  .brand{min-width:0}
+  .brand strong{font-size:15px;white-space:nowrap}
+  .brand small{display:none}
+  .brand-mark{display:none}
+  .top-actions{margin-left:auto}
+  .top-actions .ghost{font-size:11px}
+  .mobile-nav-backdrop:not([hidden]){display:block;position:fixed;inset:0;background:#0c1c19a8;z-index:19}
+  .workspace>.sidebar{display:block;position:fixed;left:0;top:0;bottom:0;width:min(85vw,340px);padding:18px 17px 28px;z-index:20;overflow-y:auto;overscroll-behavior:contain;box-shadow:10px 0 30px #10201b25;transform:translateX(-105%);visibility:hidden;transition:transform .2s ease,visibility .2s ease}
+  body.mobile-nav-open{overflow:hidden}
+  body.mobile-nav-open .workspace>.sidebar{transform:translateX(0);visibility:visible}
+  .mobile-nav-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .mobile-nav-head strong{font-size:16px}
+  .mobile-nav-head button{width:38px;height:38px;border:0;border-radius:7px;background:#dce5df;font-size:26px;line-height:1;cursor:pointer}
+  .workspace>.sidebar .chapter-list{max-height:none}
+  .workspace>.sidebar .side-foot{position:static;margin:22px 6px 0}
+  .workspace>.sidebar .chapter{font-size:14px;min-height:40px}
+  .workspace>.sidebar .section{min-height:44px}
+}
