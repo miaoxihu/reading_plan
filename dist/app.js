@@ -9,7 +9,20 @@ function readNotes(){try{const saved=JSON.parse(localStorage.getItem('兵法-not
 function persistNotes(){try{localStorage.setItem('兵法-notes',JSON.stringify(notes));return true}catch(error){return false}}
 let index=0, mode='matter', notes=readNotes(), currentReading=readings[0], currentBook='sunzi';
 const $=id=>document.getElementById(id);
-function render(){const r=currentReading;$('page-title').textContent='今天读：'+r.title;$('page-subtitle').textContent=r.sub;$('quote-source').textContent=r.source;$('quote').textContent=r.quote;$('note-text').textContent=r.note;$('matter-text').textContent=r.matter;$('people-text').textContent=r.people;$('history-title').textContent=r.historyTitle||'历史镜像';$('history-text').textContent=r.history;$('card-num').textContent=String(index+1).padStart(2,'0');const total=currentBook==='plans'?36:13;$('progress-text').textContent=Math.round((index+1)/total*100)+'%';$('progress-bar').style.width=((index+1)/total*100)+'%';document.querySelectorAll('.chapter').forEach((x,i)=>x.classList.toggle('selected',i===index));loadDraft();}
+function renderWorkplace(){
+ const chapter=currentBook==='plans'?plans[index]:chapters[index];
+ const guide=workplaceGuides[chapter];
+ if(!guide)return;
+ const [lens,responsibilityMatter,responsibilityPeople,reluctanceMatter,reluctancePeople]=guide;
+ $('work-lens').textContent=`${currentBook==='plans'?'《三十六计》':'《孙子兵法》'}·${chapter}：${lens}`;
+ $('work-responsibility-matter').textContent=responsibilityMatter;
+ $('work-responsibility-people').textContent=responsibilityPeople;
+ $('work-reluctance-matter').textContent=reluctanceMatter;
+ $('work-reluctance-people').textContent=reluctancePeople;
+ $('work-responsibility-script').textContent=`沟通示例：“这一步先按‘${lens}’处理。请确认你负责的交付和时间；有阻碍我们今天一起调整。”`;
+ $('work-reluctance-script').textContent=`沟通示例：“我想按‘${lens}’重新安排这项任务。请先确认目标和优先级，再定交付范围。”`;
+}
+function render(){const r=currentReading;$('page-title').textContent='今天读：'+r.title;$('page-subtitle').textContent=r.sub;$('quote-kind').textContent=r.placeholder?'篇目提示':'原文';$('quote-source').textContent=r.source;$('quote').textContent=r.quote;$('note-text').textContent=r.note;$('matter-text').textContent=r.matter;$('people-text').textContent=r.people;$('history-title').textContent=r.historyTitle||'历史镜像';$('history-text').textContent=r.history;$('card-num').textContent=String(index+1).padStart(2,'0');const total=currentBook==='plans'?36:13;$('progress-text').textContent=Math.round((index+1)/total*100)+'%';$('progress-bar').style.width=((index+1)/total*100)+'%';document.querySelectorAll('.chapter').forEach((x,i)=>x.classList.toggle('selected',i===index));renderWorkplace();loadDraft();}
 function loadDraft(){const n=notes.find(x=>x.title===currentReading.title);$('understanding').value=n&&n.understanding||'';$('scenario').value=n&&n.scenario||'';$('experiment').value=n&&n.experiment||'';}
 function save(){const r=currentReading, item={title:r.title,understanding:$('understanding').value,scenario:$('scenario').value,experiment:$('experiment').value,date:new Date().toLocaleDateString('zh-CN')};notes=[item,...notes.filter(x=>x.title!==r.title)];$('save-state').textContent=persistNotes()?'已保存 · '+item.date:'此浏览器无法保存笔记';renderRecent();}
 function renderRecent(){const box=$('recent-list');box.innerHTML=notes.length?notes.slice(0,4).map(n=>`<div class="recent-item"><strong>${n.title}</strong><p>${n.understanding||'已保存阅读卡'} · ${n.date}</p></div>`).join(''):'<div class="empty">还没有阅读卡。读完第一条就保存下来吧。</div>';}
@@ -20,9 +33,17 @@ $('mobile-nav-toggle').onclick=openMobileNav;
 $('mobile-nav-close').onclick=()=>{closeMobileNav();$('mobile-nav-toggle').focus();};
 $('mobile-nav-backdrop').onclick=closeMobileNav;
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.body.classList.contains('mobile-nav-open')){closeMobileNav();$('mobile-nav-toggle').focus();}});
-function renderChapters(items,title,count){currentBook=title==='三十六计'?'plans':'sunzi';$('chapter-list').innerHTML='';$('index-title').textContent=title;$('index-count').textContent=count;items.forEach((c,i)=>{const b=document.createElement('button');b.className='chapter';b.textContent=`${String(i+1).padStart(2,'0')}  ${c}`;b.onclick=()=>{index=i;currentReading=currentBook==='plans'?{title:c,sub:'三十六计 / '+(i<6?'胜战计':i<12?'敌战计':i<18?'攻战计':i<24?'混战计':i<30?'并战计':'败战计'),source:'三十六计 / '+(i<6?'胜战计':i<12?'敌战计':i<18?'攻战计':i<24?'混战计':i<30?'并战计':'败战计'),quote:'这是三十六计中的“'+c+'”，点击后已切换到对应计策。',note:'三十六计是具体局势中的应变工具；先判断局面，再判断是否适用，不能把计策当成固定套路。',matter:'先明确目标、约束和代价，再看这条计改变的是资源、节奏、注意力还是行动路径。',people:'处理人际时要区分策略与操控：保留对方的尊严、选择权和可退出空间。',history:'历史镜像',historyTitle:'局势与边界'}:readings[i%readings.length];render();closeMobileNav()};$('chapter-list').appendChild(b);});}
-document.querySelectorAll('.section').forEach(b=>b.onclick=()=>{document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.section==='sunzi'){renderChapters(chapters,'孙子兵法十三篇','13 篇')}else if(b.dataset.section==='plans'){renderChapters(plans,'三十六计','36 计')}});
+function readingForChapter(c,i){
+ const known=readings.find(r=>r.title===c||(currentBook==='sunzi'&&c==='谋攻篇'&&r.title==='知彼知己'));
+ if(known)return currentBook==='sunzi'?Object.assign({},known,{title:c,sub:'知彼知己 · 先知道自己和对方在什么位置'}):known;
+ const guide=workplaceGuides[c];
+ const source=currentBook==='plans'?'三十六计 / '+(i<6?'胜战计':i<12?'敌战计':i<18?'攻战计':i<24?'混战计':i<30?'并战计':'败战计'):'孙子兵法 / '+c;
+ return {title:c,sub:guide[0],source,quote:'本篇原文与逐句注释尚在整理；下方职场应用已按本篇主题更新。',note:'先把这篇的核心问题放到自己的工作场景中，辨别目标、责任、资源与沟通方式。',matter:guide[1],people:guide[2],history:'本篇的历史案例尚在整理。',historyTitle:'历史镜像',placeholder:true};
+}
+function renderChapters(items,title,count){currentBook=title==='三十六计'?'plans':'sunzi';$('chapter-list').innerHTML='';$('index-title').textContent=title;$('index-count').textContent=count;items.forEach((c,i)=>{const b=document.createElement('button');b.className='chapter';b.textContent=`${String(i+1).padStart(2,'0')}  ${c}`;b.onclick=()=>{index=i;currentReading=readingForChapter(c,i);render();closeMobileNav()};$('chapter-list').appendChild(b);});}
+document.querySelectorAll('.section').forEach(b=>b.onclick=()=>{document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.section==='sunzi'){renderChapters(chapters,'孙子兵法十三篇','13 篇')}else if(b.dataset.section==='plans'){renderChapters(plans,'三十六计','36 计')}const first=$('chapter-list').firstElementChild;if(first)first.click()});
 document.querySelectorAll('.book').forEach(b=>b.onclick=()=>{if(b.dataset.book==='new'){alert('下一步可以在这里添加书名、作者和目录。');return}document.querySelectorAll('.book').forEach(x=>x.classList.remove('active'));b.classList.add('active');});
 document.querySelector('#add-book').onclick=()=>alert('下一步可以在这里添加书名、作者和目录。');
 renderChapters(chapters,'孙子兵法十三篇','13 篇');
+$('chapter-list').firstElementChild.click();
 $('prev-btn').onclick=()=>{const items=document.querySelectorAll('.chapter');const item=items[(index+items.length-1)%items.length];if(item)item.click()};$('next-btn').onclick=()=>{const items=document.querySelectorAll('.chapter');const item=items[(index+1)%items.length];if(item)item.click()};$('history-btn').onclick=()=>{$('history-text').textContent='换一个角度：真正的优势常常在交锋前形成。提前准备事实、节奏和退出方案，能让你不必依赖临场勇气。'};$('copy-quote').onclick=()=>{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(currentReading.quote)};$('save-card').onclick=save;$('clear-cards').onclick=()=>{notes=[];try{localStorage.removeItem('兵法-notes')}catch(error){}renderRecent()};$('reset-btn').onclick=()=>{if(confirm('确定清空本设备上的所有阅读卡吗？')){$('clear-cards').click();loadDraft();}};$('ask-btn').onclick=()=>{const q=$('question').value.trim();if(!q)return;$('answer').classList.remove('hidden');$('answer').innerHTML=`<strong>先拆开看：</strong>你问的是“${q}”。这条原则的核心不是操控对方，而是先识别局势中的阻力。处理事儿时，检查目标、路径和节奏；处理人时，检查对方的顾虑、面子和选择权。<br><br><strong>给你的追问：</strong>如果不要求对方立刻认输，你希望他下一步做出什么可验证的动作？`};$('select-help').onclick=()=>{$('question').focus();$('question').placeholder='把你选中的原文和具体场景粘贴进来……';};render();renderRecent();
